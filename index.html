@@ -1,0 +1,206 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <!--Importera typsnittet-->
+    <link href="https://fonts.googleapis.com/css?family=Oswald&display=swap" rel="stylesheet">
+    <title>Hänga gubbe</title>
+    <style>
+        /* All text i grått, väljer typsnitt för texten */
+        p {
+            color: #525459;
+            font-family: 'Oswald', sans-serif;
+        }
+        
+        /* Bakgrundsfärg till hela sidan */
+        body {
+            background-color: #E84925;
+        }
+        
+        /* Klass för att centrera saker */
+        .center {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+        }
+        
+        /* Centrerar lådan i vilket textrutan och gissa-knappen finns */
+        #guessdiv {
+            width: 50%;
+            display: flex;
+            margin-left: auto;
+            margin-right: auto;
+            justify-content: center;
+        }
+        
+        /* Textrutan, ändrar färg, kant och typsnitt från orginalutförandet */
+        #guessbox {
+            display: inline-block;
+            margin: 2px;
+            background-color: #E84925;
+            border: 1px solid #525459;
+            font-family: 'Oswald', sans-serif;
+            color: #525459;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        /* Gissa-knappen, ändrar färg, kant och typsnitt från orginalutförandet */
+        #guessbutton {
+            display: inline-block;
+            margin: 2px;
+            background-color: #E84925;
+            border: 1px solid #525459;
+            font-family: 'Oswald', sans-serif;
+            color: #525459;
+            border-radius: 4px;
+        }
+        
+        /* Bilden på hängande gubben, centrerad */
+        #img {
+            margin-top: 15px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+        }
+        
+        /* Textstorlek för texten */
+        #guesshere {
+            font-size: 20px;
+        }
+        
+        /* Textstorlek och avstånd för linjerna */
+        #line {
+            font-size: 40px;
+            letter-spacing: 3px;
+        }
+    
+    </style>
+</head>
+
+<body>
+    <!-- Linjen för bokstäverna -->
+    <p id="line" class="center"></p><br>
+    <div id="guesstext">
+        <!-- Gissa här-texten -->
+        <p class="center" id="guesshere">Gissa bokstäver här, en åt gången:</p>
+    </div>
+    <div>
+        <div id="guessdiv">
+            <!-- Textrutan för att gissa bokstäver -->
+            <input type="text" id="guessbox">
+            <!-- Knappen för att gissa, kör funtionen när den trycks -->
+            <button onclick="guessLetter()" id="guessbutton">Gissa</button>
+        </div>
+    </div>
+    <div id="imgdiv">
+        <!-- Bilden för hängande gubben, börjar med en tom bild -->
+        <img id="img" src="https://i.imgur.com/ARF3aGE.png">
+    </div>
+    
+    <script>
+        /* Listan för ordet man väljer */
+        var wordlist = [];
+        /* Listan för de rätta bokstäverna */
+        var wordlistline = [];
+        /* Antal gissningar kvar */
+        var noguess = 10;
+        /* Vilken gissning man är på, används för att byta bild */
+        var guessno = 0;
+        /* Listan med understrecken för ej ännu gissade bokstäver */
+        var linelist = [];
+        /* Alla bilder/steg för den hängande gubben */
+        var pictures = [
+            "https://i.imgur.com/ARF3aGE.png",
+            "https://i.imgur.com/gLV0FGV.png",
+            "https://i.imgur.com/viFxhuf.png",
+            "https://i.imgur.com/8CbPC0j.png",
+            "https://i.imgur.com/ZEOomop.png",
+            "https://i.imgur.com/N8bxe9U.png",
+            "https://i.imgur.com/rN5c0fD.png",
+            "https://i.imgur.com/OfBDmR6.png",
+            "https://i.imgur.com/cArl0eB.png",
+            "https://i.imgur.com/vRuPWs6.png",
+            "https://i.imgur.com/xtoPKrP.png"
+        ];
+        
+        /* Prompt som frågar efter ordet man vill gissa */
+        var word = prompt("Skriv in ett ord");
+        
+        /* Gör om alla bokstäver till versaler */
+        var wordUpper = word.toUpperCase();
+        
+        /* Petar in rätt bokstäver i respektive lista samt rätt antal understreck */
+        for (n=0; n<wordUpper.length; n++) {
+            wordlist.push(wordUpper.charAt(n));
+            wordlistline.push(wordUpper.charAt(n))
+            linelist.push("_");
+        }
+        
+        /* Funktion för att uppdatera understrecken vid nya rätt gissade bokstäver */
+        function updateLine() {
+            document.getElementById("line").innerHTML = "";
+            document.getElementById("line").innerHTML = linelist.join(" ");
+        }
+        
+        /* Uppdaterar understrecken första gången för att visa alla understreck */
+        updateLine();
+        
+        /* Funktion när man klickar på gissa-knappen */
+        function guessLetter() {
+            /* Tar värdet från textrutan och sätter den i en variabel */
+            var guessLower = document.getElementById("guessbox").value;
+            /* Återställer textrutan så att man kan gissa en ny bokstäv */
+            document.getElementById("guessbox").value = "";
+            /* Gör om den gissade bokstaven till en versal */
+            guessUpper = guessLower.toUpperCase();
+            /* Kallar på funktionen för att kolla den gissade bokstaven */
+            check(guessUpper);
+        }
+        
+        /* Funktion för att kolla om gissad bokstav är korrekt eller ej */
+        function check(letter) {
+            /* Kollar längden på listan med antal bokstäver ännu ej gissade för att kunna jämföra senare */
+            var length = wordlist.length
+            /* Loop för att ta bort en bokstav från listan om den är rätt */
+            while (wordlist.includes(letter)) {    
+                for(x=0; x<wordlist.length+1; x++) {
+                    /* Om den gissade bokstaven överensstämmer med en/flera i ordet så tas den bort ur listan*/
+                    if (letter == wordlist[x]) {
+                        wordlist.splice(x, 1);
+                    } 
+                }
+                    /* Byter ett understreck mot den rätt gissade bokstaven och uppdaterar understrecken */
+                    for(x=0; x<wordlistline.length+1; x++) {
+                        if (letter == wordlistline[x]) {
+                            linelist[x] = letter;
+                            updateLine();
+                        }
+                    }  
+            }
+            /* Om ingen bokstav har försvunnit så har man gissat fel */
+            if (wordlist.length == length) {
+                /* Antalet gissningar kvar går ner och antal felgissningar går upp */
+                guessno++;
+                noguess--;
+                /* Bilden uppdateras för att byta till rätt steg i felgissningsprocessen */
+                document.getElementById("img").src = pictures[guessno];
+                /* If-sats, om man är på sista bilden och man har 0 gissningar kvar */
+                if (document.getElementById("img").src == "https://i.imgur.com/xtoPKrP.png" && wordlist.length > 0) {
+                    alert("Du förlörade :(");
+                    /* Sidan laddas om och påbörjar en ny omgång */
+                    location.reload();
+                }  
+            /* If-sats om man har gissat alla rätt = antalet bokstäver kvar är 0 */
+            } else if (wordlist.length == 0) {
+                alert("Du vann! Ordet var: " + wordUpper);
+                /* Sidan laddas om och påbörjar en ny omgång */
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>

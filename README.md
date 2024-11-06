@@ -1,0 +1,1 @@
+Simple HTML/JS/CSS Hangman game, school assignment in 2019
